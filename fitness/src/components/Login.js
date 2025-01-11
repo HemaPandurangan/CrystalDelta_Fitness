@@ -23,7 +23,7 @@ const Login = () => {
     try {
       const response = await axios.post('http://localhost:3001/login', { username, password });
       console.log('Login Successful:', response.data);
-      alert('Login successful!');
+      
       navigate('/Home');
     } catch (error) {
       console.error('Login Error:', error.response?.data || error.message);
@@ -50,7 +50,7 @@ const Login = () => {
               aria-label="Username"
             />
             <input
-              className="login-input-field1"
+              className="login-input-field"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

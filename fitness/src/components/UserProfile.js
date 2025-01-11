@@ -1,3 +1,5 @@
+
+
 import { Power } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react'; 
@@ -15,13 +17,11 @@ export default function UserProfile() {
   const [height, setHeight] = useState(0);
   const [location, setLocation] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
-  
-  const [goals, setGoals] = useState([
-    { label: "Running", value: "0km", icon: "🏃" },
-    { label: "Sleeping", value: "0hrs", icon: "😴" },
-    { label: "Weight Loss", value: "0kg", icon: "🔥" }
-  ]);
+  const [age, setAge] = useState(0);
 
+  const [runningGoal, setRunningGoal] = useState("0km");
+  const [sleepingGoal, setSleepingGoal] = useState("0hrs");
+  const [weightLossGoal, setWeightLossGoal] = useState("0kg");
 
   const calculateAge = (dob) => {
     const birthDate = new Date(dob);
@@ -33,9 +33,23 @@ export default function UserProfile() {
     }
     return age;
   };
-  
-  const [age, setAge] = useState(0);
 
+  useEffect(() => {
+    axios.get('http://localhost:3001/get-goal')
+      .then(response => {
+        const goalsData = response.data; 
+        if (goalsData.length) {
+          const goal = goalsData[goalsData.length - 1];  
+  
+
+          setRunningGoal(goal.Running || "0km");
+          setSleepingGoal(goal.Sleep || "0hrs");
+          setWeightLossGoal(goal.targetWeight || "0kg");
+        }
+      })
+      .catch(error => console.error('Error fetching goals data:', error));
+  }, []);
+  
 
   useEffect(() => {
     axios.get('http://localhost:3001/get-popup')
@@ -43,21 +57,18 @@ export default function UserProfile() {
         const profileData = response.data;
         const latestProfile = profileData[profileData.length - 1]; 
 
-        setFullName(latestProfile.fullName || ''); 
-        setWeight(latestProfile.weight || 0);
-        setHeight(latestProfile.height || 0);
-        setLocation(latestProfile.location || '');
-        setDateOfBirth(latestProfile.dateOfBirth || '');
+        setFullName(latestProfile?.fullName || ''); 
+        setWeight(latestProfile?.weight || 0);
+        setHeight(latestProfile?.height || 0);
+        setLocation(latestProfile?.location || '');
+        setDateOfBirth(latestProfile?.dateOfBirth || '');
 
-        if (latestProfile.dateOfBirth) {
-          setAge(calculateAge(latestProfile.dateOfBirth)); 
+        if (latestProfile?.dateOfBirth) {
+          setAge(calculateAge(latestProfile?.dateOfBirth)); 
         }
       })
       .catch(error => console.error('Error fetching profile data:', error));
   }, []);
-
-
-  
 
   const handleEditClick = () => {
     setIsPopupOpen(true); 
@@ -79,19 +90,14 @@ export default function UserProfile() {
   };
   
   const handleSaveProfile = (formData) => {
-    console.log("Saved Profile Data:", formData);
-
-
     axios.post('/popup', formData)
       .then(response => {
-        console.log('Data saved:', response.data);
         setFullName(formData.fullName || '');
         setWeight(formData.weight || 0);
         setHeight(formData.height || 0);
         setLocation(formData.location || '');
         setDateOfBirth(formData.dateOfBirth || '');
 
-        
         setIsPopupOpen(false);
         setIsGoalPopupOpen(true);
       })
@@ -100,12 +106,6 @@ export default function UserProfile() {
         alert('Error saving profile data!');
       });
   };
-
-
-  const handleNameChange = (e) => setFullName(e.target.value);
-  const handleWeightChange = (e) => setWeight(e.target.value);
-  const handleHeightChange = (e) => setHeight(e.target.value);
-
 
   const isProfileComplete = fullName && weight && height && location && dateOfBirth;
 
@@ -124,7 +124,6 @@ export default function UserProfile() {
           style={{
             width: "100%",
             maxWidth: "800px",
-        
             padding: "20px",
             backgroundColor: "#f9f9f9",
             boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
@@ -132,6 +131,7 @@ export default function UserProfile() {
             overflow: "hidden",
           }}
         >
+ 
           <div
             style={{
               display: "flex",
@@ -199,14 +199,13 @@ export default function UserProfile() {
                 justifyContent: "center",
               }}
             >
-             
               <Link to="/">
-  <Power style={{ height: "24px", width: "24px", color: "#333" }} />
-</Link>
-
+                <Power style={{ height: "24px", width: "24px", color: "#333" }} />
+              </Link>
             </div>
           </div>
 
+        
           <div
             style={{
               marginBottom: "20px",
@@ -250,6 +249,7 @@ export default function UserProfile() {
             </p>
           </div>
 
+        
           <div
             style={{
               display: "flex",
@@ -289,100 +289,81 @@ export default function UserProfile() {
             <h3 style={{ fontWeight: "bolder", color: "#333", marginBottom: "10px" }}>
               Your Goals
             </h3>
-            {goals.map((goal, index) => (
-              <div
-                key={index}
-                style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}
-              >
-                <div
-                  style={{
-                    height: "90px",
-                    width: "80px",
-                    borderRadius: "10px",
-                    backgroundColor: "#e0f7ff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: "10px",
-                    marginTop: "40px",
-                  }}
-                >
-                  {goal.icon}
+            {[{ label: "Running in km", value: runningGoal ,icon:"🏃"}, { label: "Sleeping  in hr", value: sleepingGoal ,  icon: "😴" }, { label: "Weight Loss in kg", value: weightLossGoal, icon: "🔥"  }]
+              .map((goal, index) => (
+                <div key={index} style={{ display: "flex", alignItems: "center", marginBottom: "10px" }}>
+                  <div
+                    style={{
+                      height: "80px",
+                      width: "80px",
+                      borderRadius: "10px",
+                      backgroundColor: "#e0f7ff",
+                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                    
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: "10px",
+                      marginTop: "40px",
+                    }}
+                  >
+                
+                <span style={{ fontSize: "30px" }}>{goal.icon}</span>
+                  </div>
+                  <div>
+                    <p style={{ fontWeight: "500", color: "#333" }}>{goal.label}</p>
+                    <p style={{ fontSize: "12px", color: "#666" }}>{goal.value}</p>
+                  </div>
                 </div>
-                <div>
-                  <p style={{ fontWeight: "500", color: "#333" }}>{goal.label}</p>
-                  <p style={{ fontSize: "12px", color: "#666" }}>{goal.value}</p>
-                </div>
-              </div>
-            ))}
+              ))}
           </div>
 
-<div
-  style={{
-    padding: "10px",
-    borderRadius: "10px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    backgroundColor: "#fff",
-    overflow: "hidden",
-    marginTop: "40px",
-  }}
->
-  <h3 style={{ fontWeight: "600", color: "#333", marginBottom: "10px" }}>
-    Scheduled
-  </h3>
-  {[
-    { label: "Training - Yoga Class", category: "Fitness", date: "22 Mar 2025", icon: "🧘" },
-    { label: "Training - Swimming", category: "Fitness", date: "22 Mar 2025", icon: "🏊" }
-  ].map((activity, index) => (
-    <div
-      key={index}
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: "40px",
        
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        <div
-          style={{
-            height: "70px",
-            width: "70px",
-            borderRadius: "10px",
-            backgroundColor: "#f3e5f5",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          {activity.icon}
-        </div>
-        <div>
-          <p style={{ fontWeight: "500", color: "#333" }}>{activity.label}</p>
-          <p style={{ fontSize: "12px", color: "#666" }}>{activity.category}</p>
+          <div
+            style={{
+              padding: "10px",
+              borderRadius: "10px",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+              backgroundColor: "#fff",
+              overflow: "hidden",
+              marginTop: "40px",
+            }}
+          >
+            <h3 style={{ fontWeight: "600", color: "#333", marginBottom: "10px" }}>
+              Scheduled
+            </h3>
+            {[{ label: "Training - Yoga Class", category: "Fitness", date: "22 Mar 2025", icon: "🧘" },
+            { label: "Training - Swimming", category: "Fitness", date: "22 Mar 2025", icon: "🏊" }]
+              .map((activity, index) => (
+                <div key={index} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "40px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    <div
+                      style={{
+                        height: "70px",
+                        width: "70px",
+                        borderRadius: "10px",
+                        backgroundColor: "#f3e5f5",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {activity.icon}
+                    </div>
+                    <div>
+                      <p style={{ fontWeight: "500", color: "#333" }}>{activity.label}</p>
+                      <p style={{ fontSize: "12px", color: "#666" }}>{activity.category}</p>
+                    </div>
+                  </div>
+                  <p style={{ fontSize: "12px", color: "#666" }}>{activity.date}</p>
+                </div>
+              ))}
+          </div>
         </div>
       </div>
-      <p style={{ fontSize: "12px", color: "#666" }}>{activity.date}</p>
-    </div>
-  ))}
-</div>
 
-          
-            
-          
-        </div>
-      </div> 
-
-  
-      {isPopupOpen && (
-        <Popup onClose={handleClosePopup} onSave={handleSaveProfile} />
-      )}
-
-
+      {isPopupOpen && <Popup onClose={handleClosePopup} onSave={handleSaveProfile} />}
       {isGoalPopupOpen && <Popupsetgoal onClose={handleSwitchToProfile} />}
     </div>
   );
 }
-
-

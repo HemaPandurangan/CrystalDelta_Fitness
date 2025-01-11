@@ -71,8 +71,8 @@
   align-items: center;
 }
 
-.login-input-field,
-.login-input-field1 {
+.login-input-field
+ {
   width: 70%;
   padding: 10px;
   margin-bottom: 10px;

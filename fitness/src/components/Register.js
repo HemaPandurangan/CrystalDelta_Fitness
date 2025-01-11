@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./Register.css";
+import Logo from '../Assets/logo.png';
+import Illustration2 from '../Assets/illustration2.png';
 
 const Register = () => {
   const [username, setUsername] = useState("");
@@ -26,7 +28,7 @@ const Register = () => {
         password,
       });
       console.log("Registration Successful:", response.data);
-      alert("Registration successful!");
+     
 
      
       navigate("/");
@@ -45,8 +47,8 @@ const Register = () => {
       <div className="register-container">
    
         <div className="form-container">
-          <div className="logo">
-            <img src="img/image-2.png" alt="Crystal Delta Logo" />
+          <div className="logos">
+            <img src={Logo} alt="Crystal Delta Logo" />
           </div>
           <h2>Please Fill out the form to Register!</h2>
           <form onSubmit={handleSubmit}>
@@ -89,7 +91,7 @@ const Register = () => {
 
         
         <div className="image-container">
-          <img src="img/Registerpageimage.png" alt="Illustration" />
+          <img src={Illustration2} alt="Illustration" />
         </div>
       </div>
     </div>

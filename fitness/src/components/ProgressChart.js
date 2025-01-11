@@ -79,7 +79,7 @@ function Progress() {
          
           {(timeFrame === 'Weekly' ? [latestData] : [aggregatedData]).map((activity, index) => (
          
-            Object.keys(activity).filter(key => key !== '_id').map((activityName, idx) => (
+            Object.keys(activity).filter(key => key !=='_id').map((activityName, idx) => (
               <div key={idx} className="activity">
                 <span
                   className="activity-icon"

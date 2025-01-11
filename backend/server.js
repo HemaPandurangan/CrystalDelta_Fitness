@@ -112,15 +112,19 @@ app.post("/value", async (req, res) => {
 
 
 
-app.post('/goal', (req, res) => {
-  const { Steps, Running, Sleep, targetWeight, water } = req.body;
 
-  console.log("Received data:", { Steps, Running, Sleep, targetWeight, water });
-  
 
-  res.status(200).json({ message: "Goals saved successfully!" });
+
+app.post("/goal", async (req, res) => {
+  try {
+    console.log("Received data:", req.body);
+    const GoalData = new GoalInfo(req.body);
+    await GoalData.save();
+    res.status(200).json({ message: "Data saved successfully", GoalData });
+  } catch (error) {
+    res.status(500).json({ message: "Error saving data", error });
+  }
 });
-
 
 app.post("/popup", async (req, res) => {
   try {
@@ -154,17 +158,11 @@ app.get("/getactivity-info",  (req, res) => {
   .then(activityinfos=>res.json(activityinfos))
   .catch(err=>res.json(err))
 });
-
-app.get('/getgoals', (req, res) => {
-  
-  const goals = [
-    { label: "Running", value: "0km", icon: "🏃" },
-    { label: "Sleeping", value: "0hrs", icon: "😴" },
-    { label: "Weight Loss", value: "0kg", icon: "🔥" }
-  ];
-  res.json(goals);
+app.get("/get-goal",  (req, res) => {
+  GoalInfo.find()
+  .then(goals=>res.json(goals))
+  .catch(err=>res.json(err))
 });
-
 
 app.get("/getprogress-info", (req, res) => {
   progressInfo.find()
